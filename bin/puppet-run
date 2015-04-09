@@ -4,13 +4,13 @@
 # the default.pp manifest is assumed.  Examples :
 # 
 # # Assume etc/puppet/manifests/default.pp
-# ./bin/puppet_run
+# ./bin/puppet-run
 # 
 # # Assume etc/puppet/manifests/foobar.pp
-# ./bin/puppet_run foobar
+# ./bin/puppet-run foobar
 # 
 # # Assume etc/puppet/manifests/foobar.pp
-# ./bin/puppet_run foobar.pp
+# ./bin/puppet-run foobar.pp
 # 
 # Requirements:
 # - puppet installed
