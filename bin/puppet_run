@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# Execute puppet apply for a specified manifest.  If the manifest is not given,
+# the default.pp manifest is assumed.  Examples :
+# 
+# # Assume etc/puppet/manifests/default.pp
+# ./bin/puppet_run
+# 
+# # Assume etc/puppet/manifests/foobar.pp
+# ./bin/puppet_run foobar
+# 
+# # Assume etc/puppet/manifests/foobar.pp
+# ./bin/puppet_run foobar.pp
+# 
+# Requirements:
+# - puppet installed
+# - gem installed
+# - librarian-puppet installed
+
+# Thanks to:
+# http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+BASEDIR="$(dirname "$(readlink -f "$0")")"
+
+MANIFEST=$1
+
+# Check if we have all we need
+function test_requirements {
+
+	# Make sure puppet is installed
+	if [ -z $(which puppet 2>/dev/null) ]
+	then
+		echo FATAL: puppet not found
+		echo
+		echo You might want to install it using a suitable version of:
+		echo sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+		echo sudo yum install puppet
+		echo
+		exit 1
+	fi
+
+	# Make sure gem is installed
+	if [ -z $(which gem 2>/dev/null) ]
+	then
+		echo FATAL: gem not found
+		echo
+		echo You might want to install it using a suitable version of:
+		echo sudo yum install gem
+		echo
+		exit 1
+	fi
+
+	# Make sure librarian-puppet is installed
+	if [ -z $(which librarian-puppet 2>/dev/null) ]
+	then
+		echo FATAL: librarian-puppet not found
+		echo
+		echo You might want to install it using a suitable version of:
+		echo sudo gem install librarian-puppet
+		echo
+		exit 1
+	fi
+}
+
+# Find the location of the manifest file
+# Guess, if necessary
+function guess_manifest {
+
+	local MANIFEST=$1
+
+	# If no manifest given, assume the default.pp
+	if [ -z "${MANIFEST}" ]
+	then
+		MANIFEST="${BASEDIR}/../etc/puppet/manifests/default.pp"
+		echo WARNING: No manifest specified.  Assuming $MANIFEST
+	fi
+
+	# Find the manifest file
+	if [ -f "${MANIFEST}" ]
+	then
+		MANIFEST=$MANIFEST
+	elif [ -f "${BASEDIR}/../etc/puppet/manifests/${MANIFEST}" ]
+	then
+		MANIFEST="${BASEDIR}/../etc/puppet/manifests/${MANIFEST}"
+	elif [ -f "${BASEDIR}/../etc/puppet/manifests/${MANIFEST}.pp" ]
+	then
+		MANIFEST="${BASEDIR}/../etc/puppet/manifests/${MANIFEST}.pp"
+	else
+		echo FATAL: manifest $MANIFEST not found
+		exit 1
+	fi
+
+	echo $MANIFEST
+}
+
+test_requirements
+MANIFEST=$(guess_manifest "$MANIFEST")
+
+cd ${BASEDIR}/../etc/puppet
+librarian-puppet install
+puppet apply --modulepath=modules/ $MANIFEST
