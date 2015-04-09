@@ -29,34 +29,34 @@ function test_requirements {
 	# Make sure puppet is installed
 	if [ -z $(which puppet 2>/dev/null) ]
 	then
-		echo FATAL: puppet not found
-		echo
-		echo You might want to install it using a suitable version of:
-		echo sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-		echo sudo yum install puppet
-		echo
+		echo >&2 "FATAL: puppet not found"
+		echo >&2
+		echo >&2 "You might want to install it using a suitable version of:"
+		echo >&2 "sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm"
+		echo >&2 "sudo yum install puppet"
+		echo >&2
 		exit 1
 	fi
 
 	# Make sure gem is installed
 	if [ -z $(which gem 2>/dev/null) ]
 	then
-		echo FATAL: gem not found
-		echo
-		echo You might want to install it using a suitable version of:
-		echo sudo yum install gem
-		echo
+		echo >&2 "FATAL: gem not found"
+		echo >&2
+		echo >&2 "You might want to install it using a suitable version of:"
+		echo >&2 "sudo yum install gem"
+		echo >&2
 		exit 1
 	fi
 
 	# Make sure librarian-puppet is installed
 	if [ -z $(which librarian-puppet 2>/dev/null) ]
 	then
-		echo FATAL: librarian-puppet not found
-		echo
-		echo You might want to install it using a suitable version of:
-		echo sudo gem install librarian-puppet
-		echo
+		echo >&2 "FATAL: librarian-puppet not found"
+		echo >&2
+		echo >&2 "You might want to install it using a suitable version of:"
+		echo >&2 "sudo gem install librarian-puppet"
+		echo >&2
 		exit 1
 	fi
 }
@@ -71,7 +71,7 @@ function guess_manifest {
 	if [ -z "${MANIFEST}" ]
 	then
 		MANIFEST="${BASEDIR}/../etc/puppet/manifests/default.pp"
-		echo WARNING: No manifest specified.  Assuming $MANIFEST
+		echo >&2 "WARNING: No manifest specified.  Assuming $MANIFEST"
 	fi
 
 	# Find the manifest file
@@ -85,16 +85,16 @@ function guess_manifest {
 	then
 		MANIFEST="${BASEDIR}/../etc/puppet/manifests/${MANIFEST}.pp"
 	else
-		echo FATAL: manifest $MANIFEST not found
+		echo "FATAL: manifest $MANIFEST not found"
 		exit 1
 	fi
 
-	echo $MANIFEST
+	echo "$MANIFEST"
 }
 
 test_requirements
 MANIFEST=$(guess_manifest "$MANIFEST")
 
-cd ${BASEDIR}/../etc/puppet
+cd "${BASEDIR}/../etc/puppet"
 librarian-puppet install
 puppet apply --modulepath=modules/ $MANIFEST
